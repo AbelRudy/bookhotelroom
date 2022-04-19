@@ -1,5 +1,7 @@
 package com.abelrudy.bookhotelroom.service;
 
+import java.util.List;
+
 import com.abelrudy.bookhotelroom.model.Hotel;
 import com.abelrudy.bookhotelroom.model.Room;
 import com.abelrudy.bookhotelroom.repository.HotelRepository;
@@ -12,24 +14,14 @@ import org.springframework.stereotype.Service;
 public class RoomService {
 
     @Autowired
-    HotelRepository hotelRepository;
+    private HotelRepository hotelRepository;
     @Autowired
-    RoomRepository roomRepository;
+    private RoomRepository roomRepository;
 
-    public void addRoom(Long idHotel, Room room) {
+    public List<Room> getRoomsByHotel(Long idHotel) {
         Hotel hotel = hotelRepository.findById(idHotel).orElseThrow(() -> new IllegalStateException(
                 "No hotel matches with id " + idHotel));
-        room.setHotel(hotel);
-        for (Room tempRoom : hotel.getRooms()) {
-            if (tempRoom.getRoomNumber() == room.getRoomNumber()) {
-                throw new IllegalStateException("Always have for this hotel the room " + room.getRoomNumber());
-            }
-        }
-        roomRepository.save(room);
-    }
-
-    public void deleteRoom(Long id) {
-        roomRepository.deleteById(id);
+        return hotel.getRooms();
     }
 
     public Room getRoom(Long id) {
@@ -38,7 +30,23 @@ public class RoomService {
         return room;
     }
 
-    public void updateRoom(Long id, int roomNumber, double surface, boolean isSuite, double price, String description) {
+    public Room addRoom(Long idHotel, Room room) {
+        Hotel hotel = hotelRepository.findById(idHotel).orElseThrow(() -> new IllegalStateException(
+                "No hotel matches with id " + idHotel));
+        room.setHotel(hotel);
+        for (Room tempRoom : hotel.getRooms()) {
+            if (tempRoom.getRoomNumber() == room.getRoomNumber()) {
+                throw new IllegalStateException("Always have for this hotel the room " + room.getRoomNumber());
+            }
+        }
+        return roomRepository.save(room);
+    }
+
+    public void deleteRoom(Long id) {
+        roomRepository.deleteById(id);
+    }
+
+    public Room updateRoom(Long id, int roomNumber, double surface, boolean isSuite, double price, String description) {
         Room room = roomRepository.findById(id).orElseThrow(() -> new IllegalStateException(
                 "No room matches with id " + id));
         if (roomNumber > 0 && room.getRoomNumber() != roomNumber)
@@ -49,5 +57,6 @@ public class RoomService {
             room.setSuite(isSuite);
         if (price > 0 && price != room.getPrice())
             room.setPrice(price);
+        return room;
     }
 }
